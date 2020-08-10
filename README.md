@@ -1,1 +1,1 @@
-# Voice_Speaker_Clustering_Text and Emotion based_Sentiment_Analyzer
+# Speaker Voice Embeddings Extractor and clustering with Text extractor and voice tone based Sentiment Analyzer
