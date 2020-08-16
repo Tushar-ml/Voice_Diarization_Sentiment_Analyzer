@@ -5,13 +5,12 @@ Author: Tushar Goel
 from flask import Flask, render_template, session, request,Response,redirect
 from flask_socketio import SocketIO, emit, disconnect
 from werkzeug.utils import secure_filename
-import deepspeech
 import scipy.io.wavfile
 import numpy as np
 from collections import OrderedDict
 import sys,os
 import numpy as np
-from filter import main
+
 import json
 from datetime import datetime
 import random
@@ -23,6 +22,7 @@ from io import BytesIO
 import base64
 import seaborn as sns
 from speakerDiarization import dia
+from filter import main,t
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
 # Set this variable to "threading", "eventlet" or "gevent" to test the
@@ -42,6 +42,7 @@ ALLOWED_EXTENSIONS = {'mp4','mp3','wav','flac'}
 #socketio = SocketIO(app, async_mode=async_mode)
 #thread = None
 #thread_lock = Lock()
+diar = False
 uploaded_file = ''
 import array
 import struct
@@ -56,8 +57,10 @@ def float_to_16_bit_pcm(raw_floats):
 
 @app.route('/')
 def index():
+	from filter import main
 	session['audio'] = []
 	file = open(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'),'w').close()
+	t(0)
 	return render_template('index.html')
 
 @app.route('/analyze')
@@ -74,116 +77,152 @@ def analyze():
 
 @app.route('/visualize1')
 def visualize1():
-	df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
-	df.columns = ['time','freq','category']
-	lis = []
-	for i in df['category'][:]:
-		if i=='Positive':
-			lis.append(1)
-		if i=='Negative':
-			lis.append(-1)
-		if i=='Neutral':
-			lis.append(0)
+	try:
+		df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
+		df.columns = ['time','freq','category']
+		lis = []
+		for i in df['category'][:]:
+			if i=='Positive':
+				lis.append(1)
+			if i=='Negative':
+				lis.append(-1)
+			if i=='Neutral':
+				lis.append(0)
 
-	df['scores'] = lis
+		df['scores'] = lis
 
-	'''plt.plot(df[df['category']=='Positive']['time'],df[df['category']=='Positive']['freq'],'g',label='Positive')
-							plt.plot(df[df['category']=='Negative']['time'],df[df['category']=='Negative']['freq'],'r',label = 'Negative')
-							plt.plot(df[df['category']=='Neutral']['time'],df[df['category']=='Neutral']['freq'],'b',label='Neutral')
-					'''
+		'''plt.plot(df[df['category']=='Positive']['time'],df[df['category']=='Positive']['freq'],'g',label='Positive')
+								plt.plot(df[df['category']=='Negative']['time'],df[df['category']=='Negative']['freq'],'r',label = 'Negative')
+								plt.plot(df[df['category']=='Neutral']['time'],df[df['category']=='Neutral']['freq'],'b',label='Neutral')
+						'''
 
-	x = df['time']
-	y = df['freq']
-	cmap = ListedColormap(['r', 'b', 'g'])
-	norm = BoundaryNorm([-1, -0.5, 0.5, 1], cmap.N)
-	points = np.array([x, y]).T.reshape(-1, 1, 2)
-	segments = np.concatenate([points[:-1], points[1:]], axis=1)
+		x = df['time']
+		y = df['freq']
+		cmap = ListedColormap(['r', 'b', 'g'])
+		norm = BoundaryNorm([-1, -0.5, 0.5, 1], cmap.N)
+		points = np.array([x, y]).T.reshape(-1, 1, 2)
+		segments = np.concatenate([points[:-1], points[1:]], axis=1)
 
-	lc = LineCollection(segments, cmap=cmap, norm=norm)
-	lc.set_array(df['scores'])
-	lc.set_linewidth(0.4)
-	plt.gca().add_collection(lc)
+		lc = LineCollection(segments, cmap=cmap, norm=norm)
+		lc.set_array(df['scores'])
+		lc.set_linewidth(0.4)
+		plt.gca().add_collection(lc)
 
-	plt.xlim(x.min(), x.max())
-	plt.ylim(y.min(),y.max())
-	plt.title('Audio Analysis')
-	plt.xlabel('TimeStamp')
-	plt.ylabel('Frequency')
-	plt.legend(loc='upper right')
-	figfile = BytesIO()
-	plt.savefig(figfile, format='png')
-	figfile.seek(0)  # rewind to beginning of file
-	figdata_png = figfile.getvalue()
-	figdata_png = base64.b64encode(figdata_png)
-	results = figdata_png.decode('utf-8')
-	plt.clf()
-	return results
+		plt.xlim(x.min(), x.max())
+		plt.ylim(y.min(),y.max())
+		plt.title('Audio Analysis')
+		plt.xlabel('TimeStamp')
+		plt.ylabel('Frequency')
+		plt.legend(loc='upper right')
+		figfile = BytesIO()
+		plt.savefig(figfile, format='png')
+		figfile.seek(0)  # rewind to beginning of file
+		figdata_png = figfile.getvalue()
+		figdata_png = base64.b64encode(figdata_png)
+		results = figdata_png.decode('utf-8')
+		plt.clf()
+		return results
+	except:
+		plt.imread('static/index.png')
+		figfile = BytesIO()
+		plt.savefig(figfile, format='png')
+		figfile.seek(0)  # rewind to beginning of file
+		figdata_png = figfile.getvalue()
+		figdata_png = base64.b64encode(figdata_png)
+		results = figdata_png.decode('utf-8')
+
+		plt.clf()
+		return results
 
 @app.route('/visualize2')
 def visualize2():
-	df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
-	df.columns = ['time','freq','category']
-	lis = []
-	for i in df['category'][:]:
-		if i=='Positive':
-			lis.append(1)
-		if i=='Negative':
-			lis.append(-1)
-		if i=='Neutral':
-			lis.append(0)
+	try:
+		df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
+		df.columns = ['time','freq','category']
+		lis = []
+		for i in df['category'][:]:
+			if i=='Positive':
+				lis.append(1)
+			if i=='Negative':
+				lis.append(-1)
+			if i=='Neutral':
+				lis.append(0)
 
-	df['scores'] = lis
+		df['scores'] = lis
 
-	'''plt.plot(df[df['category']=='Positive']['time'],df[df['category']=='Positive']['freq'],'g',label='Positive')
-							plt.plot(df[df['category']=='Negative']['time'],df[df['category']=='Negative']['freq'],'r',label = 'Negative')
-							plt.plot(df[df['category']=='Neutral']['time'],df[df['category']=='Neutral']['freq'],'b',label='Neutral')
-					'''
+		'''plt.plot(df[df['category']=='Positive']['time'],df[df['category']=='Positive']['freq'],'g',label='Positive')
+								plt.plot(df[df['category']=='Negative']['time'],df[df['category']=='Negative']['freq'],'r',label = 'Negative')
+								plt.plot(df[df['category']=='Neutral']['time'],df[df['category']=='Neutral']['freq'],'b',label='Neutral')
+						'''
 
-	s = ['Negative','Neutral','Positive']
-	a = [0+lis.count(-1),0+lis.count(0),0+lis.count(1)]
-	plt.title('Analysis of Sentiment')
-	plt.bar(s,a,color=['red','blue','green'])
-	figfile = BytesIO()
-	plt.savefig(figfile, format='png')
-	figfile.seek(0)  # rewind to beginning of file
-	figdata_png = figfile.getvalue()
-	figdata_png = base64.b64encode(figdata_png)
-	result1 = figdata_png.decode('utf-8')
-	plt.clf()
-	return result1
+		s = ['Negative','Neutral','Positive']
+		a = [0+lis.count(-1),0+lis.count(0),0+lis.count(1)]
+		plt.title('Analysis of Sentiment')
+		plt.bar(s,a,color=['red','blue','green'])
+		figfile = BytesIO()
+		plt.savefig(figfile, format='png')
+		figfile.seek(0)  # rewind to beginning of file
+		figdata_png = figfile.getvalue()
+		figdata_png = base64.b64encode(figdata_png)
+		result1 = figdata_png.decode('utf-8')
+		plt.clf()
+		return result1
+	except:
+		plt.imread('static/index.png')
+		figfile = BytesIO()
+		plt.savefig(figfile, format='png')
+		figfile.seek(0)  # rewind to beginning of file
+		figdata_png = figfile.getvalue()
+		figdata_png = base64.b64encode(figdata_png)
+		result1 = figdata_png.decode('utf-8')
+
+		plt.clf()
+		return result1
 
 @app.route('/visualize3')
 def visualize3():
-	df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
-	df.columns = ['time','freq','category']
-	lis = []
-	for i in df['category'][:]:
-		if i=='Positive':
-			lis.append(1)
-		if i=='Negative':
-			lis.append(-1)
-		if i=='Neutral':
-			lis.append(0)
+	try:
+		df = pd.read_csv(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
+		df.columns = ['time','freq','category']
+		lis = []
+		for i in df['category'][:]:
+			if i=='Positive':
+				lis.append(1)
+			if i=='Negative':
+				lis.append(-1)
+			if i=='Neutral':
+				lis.append(0)
 
-	df['scores'] = lis
+		df['scores'] = lis
 
-	'''plt.plot(df[df['category']=='Positive']['time'],df[df['category']=='Positive']['freq'],'g',label='Positive')
-							plt.plot(df[df['category']=='Negative']['time'],df[df['category']=='Negative']['freq'],'r',label = 'Negative')
-							plt.plot(df[df['category']=='Neutral']['time'],df[df['category']=='Neutral']['freq'],'b',label='Neutral')
-					'''
-	s = ['Negative','Neutral','Positive']
-	a = [0+lis.count(-1),0+lis.count(0),0+lis.count(1)]
-	plt.pie(a,labels=s,colors=['r','b','g'],labeldistance=None)
-	plt.legend(loc='best')
-	figfile = BytesIO()
-	plt.savefig(figfile, format='png')
-	figfile.seek(0)  # rewind to beginning of file
-	figdata_png = figfile.getvalue()
-	figdata_png = base64.b64encode(figdata_png)
-	result2 = figdata_png.decode('utf-8')
+		'''plt.plot(df[df['category']=='Positive']['time'],df[df['category']=='Positive']['freq'],'g',label='Positive')
+								plt.plot(df[df['category']=='Negative']['time'],df[df['category']=='Negative']['freq'],'r',label = 'Negative')
+								plt.plot(df[df['category']=='Neutral']['time'],df[df['category']=='Neutral']['freq'],'b',label='Neutral')
+						'''
+		s = ['Negative','Neutral','Positive']
+		a = [0+lis.count(-1),0+lis.count(0),0+lis.count(1)]
+		plt.pie(a,labels=s,colors=['r','b','g'],labeldistance=None)
+		plt.legend(loc='best')
+		figfile = BytesIO()
+		plt.savefig(figfile, format='png')
+		figfile.seek(0)  # rewind to beginning of file
+		figdata_png = figfile.getvalue()
+		figdata_png = base64.b64encode(figdata_png)
+		result2 = figdata_png.decode('utf-8')
 
-	plt.clf()
-	return result2
+		plt.clf()
+		return result2
+	except:
+		plt.imread('static/index.png')
+		figfile = BytesIO()
+		plt.savefig(figfile, format='png')
+		figfile.seek(0)  # rewind to beginning of file
+		figdata_png = figfile.getvalue()
+		figdata_png = base64.b64encode(figdata_png)
+		result2 = figdata_png.decode('utf-8')
+
+		plt.clf()
+		return result2
 
 c_t = 0
 @app.route('/analyze-stop')
@@ -352,7 +391,10 @@ def upload_file():
 			
 			return redirect(request.url)
 		file = request.files['file']
-		n_speakers = int(request.form['speaker'])
+		try:
+			n_speakers = int(request.form['speaker'])
+		except:
+			n_speakers = 0
 		print(n_speakers)
 		# if user does not select file, browser also
 		# submit an empty part without filename
@@ -363,39 +405,80 @@ def upload_file():
 			filename = secure_filename(file.filename)
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 			uploaded_file =  os.path.join(app.config['UPLOAD_FOLDER'], filename)
-
 	return render_template('index.html',url = True)
 
 @app.route('/analyze_file',methods=['GET','POST'])
 def analyze_file():
 	global uploaded_file
 	global n_speakers
+	global diar
+	diar = True
+	
 	if request.method == 'POST':
 		speaker = int(request.form['speaker'])
+		diar = False
 		if speaker == 0:
-
+			n_speakers = speaker
 			result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
 
 		else:
 			try:
+				n_speakers = speaker
 				result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result_{}.txt'.format(speaker-1)))
 			except:
 				return 'Speaker not found. Try with Different Speaker'
+
 		return render_template('files.html',results=result,results1=result1,results2=result2,speaker=speaker)
-	uploaded_file_new_name = uploaded_file.split('.')[0]+'_dsw_formatted.wav'
-	if not os.path.exists(uploaded_file_new_name):
-
-		os.system(f'ffmpeg -i {uploaded_file} -ac 1 -ar 16000 {uploaded_file_new_name}')
-		uploaded_file = uploaded_file_new_name
-
-	else:
-		print('File Already formatted')
-		uploaded_file = uploaded_file_new_name
-
-	dia(uploaded_file,n_speakers)
-	result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
 	
-	return render_template('files.html',results=result,results1=result1,results2=result2,speaker = 0)
+	return render_template('files.html',speaker = 0)
+
+@app.route('/diarization')
+def diarization():
+	global diar
+	global uploaded_file
+	global n_speakers
+
+	if diar:
+			# print(diar,uploaded_file,n_speakers)
+		uploaded_file_new_name = uploaded_file.split('.')[0]+'_dsw_formatted.wav'
+		if not os.path.exists(uploaded_file_new_name):
+
+			os.system(f'ffmpeg -i {uploaded_file} -ac 1 -ar 16000 {uploaded_file_new_name}')
+			uploaded_file = uploaded_file_new_name
+
+		else:
+			print('File Already formatted')
+			uploaded_file = uploaded_file_new_name
+		diar = False
+		
+		
+		return 'Diarization in Process'
+	elif diar == False:
+		return 'Diarization in Process'
+	elif diar == None:
+		return 'Enter the Speaker No'
+
+@app.route('/dia')
+def clustering():
+	global diar
+	global uploaded_file
+	global n_spekaers
+	if diar:
+		uploaded_file_new_name = uploaded_file.split('.')[0]+'_dsw_formatted.wav'
+		if not os.path.exists(uploaded_file_new_name):
+
+			os.system(f'ffmpeg -i {uploaded_file} -ac 1 -ar 16000 {uploaded_file_new_name}')
+			uploaded_file = uploaded_file_new_name
+
+		else:
+			print('File Already formatted')
+			uploaded_file = uploaded_file_new_name
+		dia(uploaded_file,n_speakers)
+		diar = False
+		return 'Diarization Done'
+	#result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
+'''
+	'''
 
 @socketio.on('my_event', namespace='/test')
 def test_message(message):

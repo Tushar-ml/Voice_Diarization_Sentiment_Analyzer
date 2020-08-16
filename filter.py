@@ -1,5 +1,4 @@
 import wave
-import deepspeech
 import collections
 import contextlib
 import matplotlib.pyplot as plt 
@@ -14,11 +13,14 @@ from emotion_recognition import EmotionRecognizer
 from utils import get_best_estimators
 import librosa
 from pydub import AudioSegment
+from pydub.silence import split_on_silence
 import pandas as pd
 import random,pickle
-model = deepspeech.Model('deepspeech-model.pbmm')
+import speech_recognition as sr
 
-stream_context = model.createStream()
+tracker = 0
+timestamp = 0
+
 #####################################################################################################
 # 										Emotion Analyzer 											#										
 #####################################################################################################
@@ -29,7 +31,7 @@ estimators = get_best_estimators(True)
 estimators_str, estimator_dict = get_estimators_name(estimators)
 features = ["mfcc", "chroma", "mel"]
 detector = EmotionRecognizer(estimator_dict['BaggingClassifier'], emotions='angry,happy,neutral'.split(","), features=features, verbose=0)
-modelObj = open('model.pkl','rb')
+modelObj = open('model_angry.pkl','rb')
 model_emotion = pickle.load(modelObj)
 #####################################################################################################
 
@@ -152,7 +154,7 @@ def vad_collector(sample_rate, frame_duration_ms,
 			# If we're NOTTRIGGERED and more than 90% of the frames in
 			# the ring buffer are voiced frames, then enter the
 			# TRIGGERED state.
-			if num_voiced > 0.75 * ring_buffer.maxlen:
+			if num_voiced > 0.9 * ring_buffer.maxlen:
 				triggered = True
 
 				# We want to yield all the audio we see from now until
@@ -170,7 +172,7 @@ def vad_collector(sample_rate, frame_duration_ms,
 			# If more than 90% of the frames in the ring buffer are
 			# unvoiced, then enter NOTTRIGGERED and yield whatever
 			# audio we've collected.
-			if num_unvoiced > 0.75 * ring_buffer.maxlen:
+			if num_unvoiced > 0.9 * ring_buffer.maxlen:
 
 				triggered = False
 				yield b''.join([f.bytes for f in voiced_frames])
@@ -184,8 +186,7 @@ def vad_collector(sample_rate, frame_duration_ms,
 	if voiced_frames:
 		yield b''.join([f.bytes for f in voiced_frames])
 
-tracker = 0
-timestamp = 0
+
 def transcription_filter(text):
 	pass
 
@@ -197,97 +198,211 @@ def result_writer(audio_file,emotion,result,filename,file=False):
 		if file:
 			timestamp = 0
 		file = open(filename,'a')
-		n = 'Neutral'
+		n = 'Positive'
 		if emotion ==  'neutral':
 			if result == 'POSITIVE':
 				n = 'Positive'
-				
-			if result == 'NEGATIVE':
+				print(n)
+			elif result == 'NEGATIVE':
 				n = 'Negative'
-				
+				print(n)
 			else:
 				n = 'Neutral'
-					
+				print(n)	
 			
-		if emotion == 'happy':
+		elif emotion == 'happy':
 			if result == 'POSITIVE':
 				n = 'Positive'
-				
-			if result == 'NEGATIVE':
-				n = 'Positive'
-			   
+				print(n)
+			elif result == 'NEGATIVE':
+				n = 'Negative'
+				print(n)
 			else:
 				n = 'Positive'
-				
+				print(n)
 
-		if emotion ==  'angry':
+		elif emotion ==  'angry':
 			if result == 'POSITIVE':
 				n = 'Negative'
-			
+				print(n)
 
-			if result == 'NEGATIVE':
+			elif result == 'NEGATIVE':
 				n = 'Negative'
-				
+				print(n)
 
 			else:
 				n = 'Negative'
+				print(n)
 		audio,sr = librosa.load(audio_file,sr=16000)
 		length = librosa.get_duration(filename=audio_file)
-		audio = audio[200:-200]
-		
+		audio = audio
+		print(len(audio))
 		new_timestamp = length + timestamp
 		a = np.linspace(timestamp,new_timestamp,len(audio))
 		print('Writing timestamp files....')
 		for i in range(len(audio)):
 			file.write(f'{a[i]},{audio[i]},{n}\n')
 		timestamp = new_timestamp
+def t(t):
+	global timestamp
+	global tracker
+	timestamp = t
+	tracker = t
+def main_file(file,labels=[0,1],folder='uploads',overall=False):
+	song = AudioSegment.from_wav(file) 
 
+	# open a file where we will concatenate 
+	# and store the recognized text 
+	fh = open("recognized.txt", "w+") 
+		
+	# split track where silence is 0.5 seconds 
+	# or more and get chunks 
+	chunks = split_on_silence(song, 
+		# must be silent for at least 0.5 seconds 
+		# or 500 ms. adjust this value based on user 
+		# requirement. if the speaker stays silent for 
+		# longer, increase this value. else, decrease it. 
+		min_silence_len =2000, 
+
+		# consider it silent if quieter than -16 dBFS 
+		# adjust this per requirement 
+		silence_thresh = song.dBFS-3
+	) 
+
+	# create a directory to store the audio chunks. 
+	try: 
+		os.mkdir('uploads') 
+	except(FileExistsError): 
+		pass
+
+	# move into the directory to 
+	# store the audio files. 
+
+
+	i = 0
+	# process each chunk 
+	print('Entering')
+	print(chunks)
+	for chunk in chunks: 
+		rec = ' '
+		# Create 0.5 seconds silence chunk 
+		chunk_silent = AudioSegment.silent(duration = 10) 
+
+		# add 0.5 sec silence to beginning and 
+		# end of audio chunk. This is done so that 
+		# it doesn't seem abruptly sliced. 
+		audio_chunk = chunk_silent + chunk + chunk_silent 
+
+		# export audio chunk and save it in 
+		# the current directory. 
+		print("saving chunk{0}.wav".format(i)) 
+		# specify the bitrate to be 192 k 
+		audio_chunk.export("uploads/chunk{0}.wav".format(i), bitrate ='192k', format ="wav") 
+
+		# the name of the newly created chunk 
+		audio_file = 'uploads/chunk'+str(i)+'.wav'
+
+		print("Processing chunk "+str(i)) 
+
+		# get the name of the newly created chunk 
+		# in the AUDIO_FILE variable for later use. 
+		
+
+		# create a speech recognition object 
+		r = sr.Recognizer() 
+
+		# recognize the chunk 
+		with sr.AudioFile(audio_file) as source: 
+			# remove this if it is not working 
+			# correctly. 
+			r.adjust_for_ambient_noise(source) 
+			audio_listened = r.listen(source) 
+
+			try: 
+				# try converting it to text 
+				rec += r.recognize_google(audio_listened,language='en-IN,en-US') 
+				# write the output to the file. 
+				fh.write(rec+". ") 
+
+			# catch any errors. 
+			except sr.UnknownValueError: 
+				print("Could not understand audio") 
+
+			except sr.RequestError as e: 
+				print("Could not request results. check your internet connection") 
+
+		i += 1
+		text = rec
+		
+		try:
+			emotion = model_emotion.predict(audio_file)
+		except:
+			emotion = 'neutral'
+		print(text)
+		result = sentiment_scores(text)
+		print(result)
+		if overall:
+			filename = os.path.join(folder,'result.txt')
+			result_writer(audio_file,emotion,result,filename)
+		else:
+			filename = os.path.join(folder,'result_{}.txt'.format(file.split('.')[0].split('_')[-1]))
+			file_res = open(filename,'w').close()
+			if float(file.split('.')[0].split('_')[-1]) in labels:
+				filename = os.path.join(folder,'result_{}.txt'.format(file.split('.')[0].split('_')[-1]))
+				result_writer(audio_file,emotion,result,filename,file=True)
 
 previous_segment_length = 0
 def main(audio=None,file=False,folder=None,sample_rate=16000,labels=[0,1]):
 	global previous_segment_length
 	global timestamp
 	global tracker
+	import speech_recognition as sr
+	r = sr.Recognizer()
 	vad = webrtcvad.Vad()
-	if file:
-		print(file)
-		audio,sr = read_wave(file)
-	frames = frame_generator(20, audio, sample_rate)
+	frames = frame_generator(30, audio, sample_rate)
 	frames = list(frames)
-	segments = vad_collector(sample_rate, 30, 1000, vad, frames)
+	segments = vad_collector(sample_rate, 30, 3000, vad, frames)
 	
 	for i, segment in enumerate(segments):
 			a = []
-			if segment is not None:
-				path = os.path.join(folder,str(tracker)+'.wav')
+			
+			path = os.path.join(folder,str(tracker)+'.wav')
 
-				print(' Writing %s' % (path,))
-				a.append(path)
-				seg = segment[:200]+segment[previous_segment_length:] + segment[:200]
-				write_wave(path, seg, sample_rate)
-				tracker += 1
-				previous_segment_length = len(segment)
-				for audio in a:
-					print(audio)
-					w = wave.open(audio,'r')
-					print(f'Recognising Audio {audio}')
-					frames = w.getnframes()
-					buffer = w.readframes(frames)
-					data16 = np.frombuffer(buffer, dtype=np.int16)
-					text = model.stt(data16)
-					print('Recognises: {}'.format(text))
-					result = sentiment_scores(text)
-					print(result)
+			print(' Writing %s' % (path,))
+			a.append(path)
+			
+			seg = segment[:200]+segment[previous_segment_length-60000:]
+			
+			write_wave(path, seg, sample_rate)
+			tracker += 1
+			previous_segment_length = len(segment)
+			for audio in a:
+				
+				with sr.AudioFile(audio) as source:
+					# listen for the data (load audio to memory)
+					r.adjust_for_ambient_noise(source)
+					audio_data = r.record(source)
+					# recognize (convert from speech to text)
+					try:
+						text = r.recognize_google(audio_data,language='en-IN,en-US')
+					except:
+						text = ''
+
+
+					
+				print('Recognises: {}'.format(text))
+				result = sentiment_scores(text)
+				print(result)
+				try:
 					emotion = model_emotion.predict(audio)
-					print(emotion)
-					filename = os.path.join(folder,'result.txt')
-					print(filename)
-					result_writer(audio,emotion,result,filename)
-					if file:
-						filename = os.path.join(folder,'result_{}.txt'.format(file.split('.')[0].split('_')[-1]))
-						file_res = open(filename,'w').close()
-						if float(file.split('.')[0].split('_')[-1]) in labels:
-							filename = os.path.join(folder,'result_{}.txt'.format(file.split('.')[0].split('_')[-1]))
-							result_writer(audio,emotion,result,filename,file=True)
+				except:
+					emotion = 'neutral'
+				print(emotion)
+				filename = os.path.join(folder,'result.txt')
+				print(filename)
+				result_writer(audio,emotion,result,filename)
+
+			
+					
 
 
