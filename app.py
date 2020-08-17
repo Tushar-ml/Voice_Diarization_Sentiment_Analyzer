@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from io import BytesIO
 import base64
 import seaborn as sns
-from speakerDiarization import dia
+from speakerDiarization import dia,label
 from filter import main,t
 from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, BoundaryNorm
@@ -412,23 +412,32 @@ def analyze_file():
 	global uploaded_file
 	global n_speakers
 	global diar
+	global no_of_speaker
+	global info
 	diar = True
 	
 	if request.method == 'POST':
-		speaker = int(request.form['speaker'])
+		try:
+			speaker = int(request.form['speaker'])
+		except:
+			speaker = 0
 		diar = False
 		if speaker == 0:
 			n_speakers = speaker
 			result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
-
+			message = ''
 		else:
 			try:
 				n_speakers = speaker
 				result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result_{}.txt'.format(speaker-1)))
+				message = ''
 			except:
-				return 'Speaker not found. Try with Different Speaker'
+				result = ''
+				result1 = ''
+				result2 = ''
+				message = 'Speaker Not Found. Please try with different speakers.'
 
-		return render_template('files.html',results=result,results1=result1,results2=result2,speaker=speaker)
+		return render_template('files.html',results=result,results1=result1,results2=result2,speaker=speaker,message=message,info=info)
 	
 	return render_template('files.html',speaker = 0)
 
@@ -457,12 +466,15 @@ def diarization():
 		return 'Diarization in Process'
 	elif diar == None:
 		return 'Enter the Speaker No'
-
+no_of_speaker = 2
+info = ''
 @app.route('/dia')
 def clustering():
 	global diar
 	global uploaded_file
 	global n_spekaers
+	global no_of_speaker
+	global info
 	if diar:
 		uploaded_file_new_name = uploaded_file.split('.')[0]+'_dsw_formatted.wav'
 		if not os.path.exists(uploaded_file_new_name):
@@ -474,8 +486,12 @@ def clustering():
 			print('File Already formatted')
 			uploaded_file = uploaded_file_new_name
 		dia(uploaded_file,n_speakers)
+		no_of_speaker = label()
+		a = len(no_of_speaker)
+		s = [int(sp)+1 for sp in no_of_speaker]
 		diar = False
-		return 'Diarization Done'
+		info  = f'Diarization Done . { a } speaker Found. Type 0 for whole Audio Visualization or Choose Speaker no from {s} for Particular Speaker sentiment and Click on Show button'
+		return f'Diarization Done . { a } speaker Found. Type 0 for whole Audio Visualization or Choose Speaker no from {s} for Particular Speaker sentiment and Click on Show button'
 	#result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
 '''
 	'''

@@ -35,23 +35,29 @@
                  <br>
                   <center><img src='static/logo.png' height='35'></center>
                 <div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+
                   {% if speaker == 0 %}
+
                     <h1 class="display-4">Visualization for Overall Voice</h1>
+
                   {% else %}
 
                     <h1 class="display-4">Visualization for Speaker {{ speaker }}</h1>
-
+                    
                   {% endif %}
                   <a href="/upload" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">< Back</a>
                   <a href="/" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Home</a>
 
                 </div>
-                <center><div id='diarization'>Conversion of Audio....</div></center>
+                <center><div id='diarization'>Conversion of Audio....Confirmation Message arrives soon</div></center>
                 <center><div id='dia'></div></center>
+                <center><p>{{ info }}</p></center>
+                <p><center>{{ message }}</center><
                 <center><form method='POST' action='/analyze_file'>
+
                       Speaker:<input  name='speaker' default=0><br>
                       <br>
-                      <input type=submit value=Show>
+                      <input type=submit value=Show id='show'>
                    
                 </form>
                 </center>
@@ -103,10 +109,12 @@
                               refresh();
                             }, 2000);
                           }*/
+                
                  $(document).ready( function(){
                       $('#dia').load('/dia');
+                      console.log($('#dia'))
                       });
-                 /*$(document).ready( function(){
+                /* $(document).ready( function(){
                 $('#visualize1').load('/visualize1')[0].src = 'static/index.png';
                 $('#visualize2').load('/visualize2')[0].src = 'static/index.png';
                 $('#visualize3').load('/visualize3')[0].src = 'static/index.png';
@@ -122,7 +130,7 @@
                     $('#visualize1').load('/visualize1')[0].src = s1.concat($('#visualize1').load('/visualize1')[0].textContent) ;
                     
                     // console.log($('#visualize1').load('/visualize1') )
-                    refresh_1();
+                    
                   }, 500);
                 }
 
@@ -133,7 +141,7 @@
                     $('#visualize2').load('/visualize2')[0].src = s1.concat($('#visualize2').load('/visualize2')[0].textContent) ;
                     
                     // console.log($('#visualize1').load('/visualize1') )
-                    refresh_2();
+                   
                   }, 500);
                 }
                 function refresh_3()
@@ -143,7 +151,7 @@
                     $('#visualize3').load('/visualize3')[0].src = s1.concat($('#visualize3').load('/visualize3')[0].textContent) ;
                     
                     // console.log($('#visualize1').load('/visualize1') )
-                    refresh_3();
+                    
                   }, 500);
                 } */
               </script>

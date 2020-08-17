@@ -84,12 +84,11 @@
             {% if url %}
               <form method=post enctype=multipart/form-data>
                 <input type=file name=file><br><br>
-                Number of Speakers:<input  name='speaker' default=0><br>
+                Number of Speakers (optional) :<input  name='speaker' default=0><br>
               <input type=submit value=Upload>
              
             </form>
             <br><br>
-            <a href="/" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Back</a>
             <a href="/analyze_file" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Analyze</a>
             {% endif %}
           </div>

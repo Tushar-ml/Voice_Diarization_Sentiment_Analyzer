@@ -2,7 +2,10 @@ from audioSegmentation import speaker_diarization
 import pandas as pd
 from pydub import AudioSegment
 from filter import main_file,main
+labels = [0,1]
+
 def dia(filename,speakers,lda_dim = 0):
+	global labels
 	file = open('Speaker_Diarization.txt','w').close()
 	main_file(filename,overall=True)
 	timestamp,classes = speaker_diarization(filename=filename,n_speakers=speakers,lda_dim=lda_dim)
@@ -57,3 +60,7 @@ def dia(filename,speakers,lda_dim = 0):
 			print('Files Exported')
 			main_file(file = file,folder='uploads',labels=labels)
 	
+
+def label():
+	global labels
+	return labels
