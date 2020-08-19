@@ -111,8 +111,8 @@ def visualize1():
 		plt.xlim(x.min(), x.max())
 		plt.ylim(y.min(),y.max())
 		plt.title('Audio Analysis')
-		plt.xlabel('TimeStamp')
-		plt.ylabel('Frequency')
+		plt.xlabel('TimeStamp (sec)')
+		plt.gca().axes.yaxis.set_visible(False)
 		plt.legend(loc='upper right')
 		figfile = BytesIO()
 		plt.savefig(figfile, format='png')
@@ -156,9 +156,10 @@ def visualize2():
 						'''
 
 		s = ['Negative','Neutral','Positive']
-		a = [0+lis.count(-1),0+lis.count(0),0+lis.count(1)]
+		a = [(0+lis.count(-1))*100/len(lis),(0+lis.count(0))*100/len(lis),(0+lis.count(1))*100/len(lis)]
 		plt.title('Analysis of Sentiment')
 		plt.bar(s,a,color=['red','blue','green'])
+		plt.ylabel('Percentage')
 		figfile = BytesIO()
 		plt.savefig(figfile, format='png')
 		figfile.seek(0)  # rewind to beginning of file
@@ -202,7 +203,7 @@ def visualize3():
 		s = ['Negative','Neutral','Positive']
 		a = [0+lis.count(-1),0+lis.count(0),0+lis.count(1)]
 		plt.pie(a,labels=s,colors=['r','b','g'],labeldistance=None)
-		plt.legend(loc='best')
+		plt.legend(loc='upper right')
 		figfile = BytesIO()
 		plt.savefig(figfile, format='png')
 		figfile.seek(0)  # rewind to beginning of file
@@ -266,8 +267,8 @@ def stop(file = False):
 		plt.xlim(x.min(), x.max())
 		plt.ylim(y.min(),y.max())
 		plt.title('Audio Analysis')
-		plt.xlabel('TimeStamp')
-		plt.ylabel('Frequency')
+		plt.xlabel('TimeStamp (sec) ')
+		plt.gca().axes.yaxis.set_visible(False)
 		plt.legend(loc='upper right')
 		figfile = BytesIO()
 		plt.savefig(figfile, format='png')
@@ -278,9 +279,10 @@ def stop(file = False):
 		plt.clf()
 		
 		s = ['Negative','Neutral','Positive']
-		a = [0+lis.count(-1),0+lis.count(0),0+lis.count(1)]
+		a = [(0+lis.count(-1))*100/len(lis),(0+lis.count(0))*100/len(lis),(0+lis.count(1))*100/len(lis)]
 		plt.title('Analysis of Sentiment')
 		plt.bar(s,a,color=['red','blue','green'])
+		plt.ylabel('Percentage')
 		plt.savefig(os.path.join(app.config['UPLOAD_FOLDER'],'Sentiment_Bar_{}.png'.format(c_t)))
 		plt.savefig(figfile, format='png')
 		figfile.seek(0)  # rewind to beginning of file
@@ -340,9 +342,9 @@ def visualizer(file):
 		plt.gca().legend(('Negative','Neutral','Positive'))
 		plt.xlim(x.min(), x.max())
 		plt.ylim(y.min(),y.max())
+		plt.gca().axes.yaxis.set_visible(False)
 		plt.title('Audio Analysis')
-		plt.xlabel('TimeStamp')
-		plt.ylabel('Frequency')
+		plt.xlabel('TimeStamp (sec) ')
 		plt.legend(loc='upper right')
 		figfile = BytesIO()
 		plt.savefig(figfile, format='png')
@@ -353,9 +355,10 @@ def visualizer(file):
 		plt.clf()
 		
 		s = ['Negative','Neutral','Positive']
-		a = [0+lis.count(-1),0+lis.count(0),0+lis.count(1)]
+		a = [(0+lis.count(-1))*100/len(lis),(0+lis.count(0))*100/len(lis),(0+lis.count(1))*100/len(lis)]
 		plt.title('Analysis of Sentiment')
 		plt.bar(s,a,color=['red','blue','green'])
+		plt.ylabel('Percentage')
 		plt.savefig(os.path.join(app.config['UPLOAD_FOLDER'],'Sentiment_Bar_{}.png'.format(c_t)))
 		plt.savefig(figfile, format='png')
 		figfile.seek(0)  # rewind to beginning of file
@@ -405,6 +408,8 @@ def upload_file():
 			filename = secure_filename(file.filename)
 			file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
 			uploaded_file =  os.path.join(app.config['UPLOAD_FOLDER'], filename)
+			check_file = os.path.exists(uploaded_file)
+		return render_template('index.html',url=True,upload_message = 'File Uploaded.Click Analyze',check_file=check_file)
 	return render_template('index.html',url = True)
 
 @app.route('/analyze_file',methods=['GET','POST'])
@@ -424,20 +429,32 @@ def analyze_file():
 		diar = False
 		if speaker == 0:
 			n_speakers = speaker
-			result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
-			message = ''
+			try:
+				result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
+				message = ''
+			except:
+				result = ''
+				result1 = ''
+				result2 = ''
+				message = 'Wait for the Process to complete'
 		else:
 			try:
 				n_speakers = speaker
-				result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result_{}.txt'.format(speaker-1)))
-				message = ''
+				try:
+					result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result_{}.txt'.format(speaker-1)))
+					message = ''
+				except:
+					result = ''
+					result1 = ''
+					result2 = ''
+					message = 'Wait for the Process to complete.'
 			except:
 				result = ''
 				result1 = ''
 				result2 = ''
 				message = 'Speaker Not Found. Please try with different speakers.'
 
-		return render_template('files.html',results=result,results1=result1,results2=result2,speaker=speaker,message=message,info=info)
+		return render_template('speaker.html',results=result,results1=result1,results2=result2,speaker=speaker,message=message,info=info)
 	
 	return render_template('files.html',speaker = 0)
 
@@ -468,6 +485,9 @@ def diarization():
 		return 'Enter the Speaker No'
 no_of_speaker = 2
 info = ''
+@app.route('/message')
+def mess():
+	return 'Thanks for Uploading. File is in Process.'
 @app.route('/dia')
 def clustering():
 	global diar
@@ -488,10 +508,10 @@ def clustering():
 		dia(uploaded_file,n_speakers)
 		no_of_speaker = label()
 		a = len(no_of_speaker)
-		s = [int(sp)+1 for sp in no_of_speaker]
+		s = ','.join(str(int(sp)+1) for sp in sorted(no_of_speaker))
 		diar = False
-		info  = f'Diarization Done . { a } speaker Found. Type 0 for whole Audio Visualization or Choose Speaker no from {s} for Particular Speaker sentiment and Click on Show button'
-		return f'Diarization Done . { a } speaker Found. Type 0 for whole Audio Visualization or Choose Speaker no from {s} for Particular Speaker sentiment and Click on Show button'
+		info  = f'{ a } speaker Identified. Type 0 for whole Audio Visualization or Choose Speaker no from {s} for Respective Speaker sentiment and Click on Show button'
+		return f'{ a } speaker Identified. Type 0 for whole Audio Visualization or Choose Speaker no from {s} for Respective Speaker sentiment and Click on Show button'
 	#result,result1,result2 = visualizer(os.path.join(app.config['UPLOAD_FOLDER'],'result.txt'))
 '''
 	'''

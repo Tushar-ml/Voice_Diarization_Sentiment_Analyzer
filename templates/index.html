@@ -31,7 +31,7 @@
       }
     </style>
       <br>
-      <center><img src='static/logo.png' height='35'></center>
+      <center><!-- <img src='static/logo.png' height='35'> --><p style="font-size:35px">Team 1</p></center>
       
     
 
@@ -85,11 +85,18 @@
               <form method=post enctype=multipart/form-data>
                 <input type=file name=file><br><br>
                 Number of Speakers (optional) :<input  name='speaker' default=0><br>
+
               <input type=submit value=Upload>
              
             </form>
             <br><br>
-            <a href="/analyze_file" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Analyze</a>
+            
+            {% if check_file %}
+              <p><center>{{ upload_message }}</center></p>
+              <a href="/analyze_file" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Analyze</a>
+            {% else %}
+              <a href="/" class="btn btn-primary btn-lg active" role="button" aria-pressed="true">Back</a>
+            {% endif %}
             {% endif %}
           </div>
         </div>
