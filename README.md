@@ -1,34 +1,30 @@
----
+# VOICE SENTIMENT ANALYZER
+**Voice Sentiment Analyzer** is a Model created for the purposes of analysis of real time audio or recorded audio for many **service based companies** which give insights of **feedback** and **queries** along with **sentiment** directly to them without any manual work on each call received from the customers. This help many organisations to improve their service providing systems **efficiently** and **effectively**.
+## CONTENTS
 
+- <a href="#architecture">Architecture</a>
+ - <a href="#research">Research</a>
+ - <a href="#usage">Usage</a>
+		 - <a href="#recording">Recording</a>
+		  - <a href="#uploading">Uploading File</a>
+- <a href="#deployment">Deployment</a>
+- <a href="#furtherenhancement">Further Enhancement</a>
 
----
-
-<h1 id="voice-sentiment-analyzer">VOICE SENTIMENT ANALYZER</h1>
-<p><b>Voice Sentiment Analyzer</b> is a Model created for the purposes of analysis of real time audio or recorded audio for many <strong>service based companies</strong>, which give insights of <strong>feedback</strong> and <strong>queries</strong> along with <strong>sentiment</strong> directly to them without any manual work on each call received from the customers. This help many organisations to improve their service providing systems <strong>efficiently</strong> and <strong>effectively</strong>.</p>
-<h2 id="contents">CONTENTS</h2>
-<ul>
-<li><a href="#architecture">Architecture</a></li>
-<li><a href="#research">Research</a></li>
-<li><a href="#usage">Usage</a>
-<ul>
-<li><a href="#recording">Recording</a></li>
-<li><a href="#uploading">Uploading File</a></li>
-</ul>
-</li>
-<li><a href="#deployment">Deployment</a></li>
-<li><a href="#furtherenhancement">Further Enhancement</a></li>
-</ul>
  <h2 id="architecture">ARCHITECTURE</h2>
-<p><img src="https://drive.google.com/uc?export=view&amp;id=1aR7EUXVlIHbIAfd-8C9mBJfS536DrYAs" alt="enter image description here"><br>
-Above Image is the Voice Analysis Pipeline. Let’s Understand every phase of it’s working:</p>
-<ol>
-<li><u><strong>Data Collection</strong></u>: Using the Flask API, we will collect the audio in the form of Real time Audio or Recording through Mic or By Uploading the File to the server or by Connecting Institutional or Organisation Database with it.<br></li>
-<li><u><strong>Preprocessing</strong></u>: Preprocessing of Audio require when audio is being uploaded or database connect to them. Preprocessing includes <strong>Speaker Diarization</strong> Process which through some clustering mechanisms separate out different speaker voices into different audio files. After Diarization process, there will be <strong>Voice Activity Detection</strong> , which separate <strong>speech</strong> and <strong>silence</strong> into different audio chunks for fast working of audio analysis.<br></li>
-<li><u><strong>Model Building</strong></u>: Model Building Process in our Product makes it unique among its competitors, Our Model comprises of two Models:<br>
-<p></p><ul><li><u><b>Speech to Text and Analysis</b></u></li>It converts incoming speech parts into Text using Google Speech-to-Text API. After conversion, sentiment of text is obtained from pretrained model and will be classified into different sentiment as <strong>Positive</strong>, <strong>Neutral</strong> and <strong>Negative</strong>. <br><br>
-<li><u><b>Speech Emotion Analyzer</b></u></li>Using Pretrained Emotion Analyzer, we classify emotion of audio broadly into three categories as: **Happy, Neutral ** and <strong>Angry</strong> emotions .</ul><p></p><br></li>
-<li><u><strong>Result Generation</strong></u>: We will combine result obtained from two models into one to get our final result. We will visualize these results into various Graphs as Shown below:<br>
-<img src="https://drive.google.com/uc?export=view&amp;id=1RJ8DUuE_JDRov05Q37k0HvlgyxoHCo37" alt="Result Visualization"></li>
-</ol>
-<h2 id="research">RESEARCH</h2>
+ <img src='https://drive.google.com/uc?export=view&amp;id=1aR7EUXVlIHbIAfd-8C9mBJfS536DrYAs'>
+Above Image is the Voice Analysis Pipeline. Let’s Understand every phase of it’s working:
 
+1. <u>**Data Collection**</u>: Using the Flask API, we will collect the audio in the form of Real time Audio or Recording through Mic or By Uploading the File to the server or by Connecting Institutional or Organisation Database with it.<br></li>
+2. <u>**Preprocessing**</u>: Preprocessing of Audio require when audio is being uploaded or database connect to them. Preprocessing includes  **Speaker Diarization** Process which through some clustering mechanisms separate out different speaker voices into different audio files. After Diarization process, there will be **Voice Activity Detection**, which separate **speech** and **silence**  into different audio chunks for fast working of audio analysis.<br>
+3. <u>**Model Building**</u>: Model Building Process in our Product makes it unique among its competitors, Our Model comprises of two Models:<br><br>
+	 - <u>**Speech to Text and Analysis**</u>
+ It converts incoming speech parts into Text using Google Speech-to-Text API. After conversion, sentiment of text is obtained from pretrained model and will be classified into different sentiment as **Positive**, **Neutral** and **Negative** .<br><br>
+	- <u>**Speech Emotion Analyzer**</u>
+Using Pretrained Emotion Analyzer, we classify emotion of audio broadly into three categories as: **Happy, Neutral ** and <strong>Angry</strong> emotions .<br><br>
+4. <u>**Result Generation**</u>: We will combine result obtained from two models into one to get our final result. We will visualize these results into various Graphs as Shown below:<br>
+<img src="https://drive.google.com/uc?export=view&amp;id=1RJ8DUuE_JDRov05Q37k0HvlgyxoHCo37" alt="Result Visualization">
+
+<h2 id="research">RESEARCH</h2>
+Now we are going to discuss how we reach to our final approach of selection of Model and creation of pipeline along with problems faced and their respective solutions.
+
+1. **Speaker Diarization**: Speaker Diarization is the process 
