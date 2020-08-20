@@ -27,4 +27,9 @@ Using Pretrained Emotion Analyzer, we classify emotion of audio broadly into thr
 <h2 id="research">RESEARCH</h2>
 Now we are going to discuss how we reach to our final approach of selection of Model and creation of pipeline along with problems faced and their respective solutions.
 
-1. **Speaker Diarization**: Speaker Diarization is the process 
+1. **Speaker Diarization**: Speaker Diarization is the process in which we apply different clustering techniques to the features of the audio to seperate speakers present, to have a detailed indivisual sentiment also with overall audio sentiment.
+	<p> Our first approach goes to use Google supervised diarization algorithm for clustering mechanism known as <b>UIS-RNN</b> ( Unbounded Interleaved-State Recurrent Neural Network ) and combine with VGG-16 voice feature extraction but having a less accuracy having a overlapping problem. </p>
+	<p> Currently we are using  <b>PyAudioAnalysis </b> which uses <b>K-Means </b> and <b> SVM</b> to segregate speaker voices from audio file where number of  speakers may be defined by user or it uses elbow method to determine appropriate number of clusters.</p>
+	<p>In our further enhancements, we  will be using <b>RPNSD</b> (Regional Proposed Network Speaker Diarization) , most accurate and resolved overlapped problem.</p>
+
+2. **Voice Activity Detection**: It is a technique which classify different parts of audio file into **speech** or **silence** categories.
