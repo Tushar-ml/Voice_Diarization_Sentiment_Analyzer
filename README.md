@@ -61,11 +61,26 @@ Now we are going to discuss how we reach to our final approach of selection of M
 	2. It will take you to another webpage , where it will be asking for <b>microphone access</b> of your browser and it will <b>start recording</b> and you can see <b>live visualization graph .</b><br><br>
 	<img src='https://drive.google.com/uc?export=view&amp;id=1lz6omVtWbDjNh9Kj0-nM91FlKGf_T5Ic'><br>
 	<br>
-	3.After you have done recording, it will take some time to buffer all your audio and give  a static graph, which is automatically saved to your history.<br><br>
+	3.After you have done recording,<b> Press Stop Button</b> , it will take some time to buffer all your audio and give  a static graph, which is automatically saved to your history.<br><br>
 	<img src='https://drive.google.com/uc?export=view&amp;id=1HWEtTvphK46gUFx3Vwi5ysVfEHGspT7v'>
 
 <u><h3 id='uploading'> Uploading a File </h3></u>
+1. Click on <b>Upload Button</b> on Main page. <br><br>
+<img src='https://drive.google.com/uc?export=view&amp;id=1CBTse__-7w9Dd7XrUbEMqSGU1MqPZXa5'><br><br>
 
+2. Then upload the file using <b>Browse button</b> from your device, and then enter <b>number of speakers present in the audio ( Optional ) </b>and then click on <b>Upload.</b> <br><br>
+<img src='https://drive.google.com/uc?export=view&amp;id=1apXYku1jj3_dwBz0wuCkIcZOG7otiDCy'><br><br>
 
+3. After Successfull upload it will pop up a message and an <b>Analyze Button</b>. Click on it.<br><br>
+<img src='https://drive.google.com/uc?export=view&amp;id=1oyK-aZTjHPnLG91sn6Oq2_DPtyL-IrGi'><br><br>
+
+4. After clicking on Analyze button, it will take you the next window , where it will show up a message of <b>processing audio in Backend.</b><br><br>
+<img src='https://drive.google.com/uc?export=view&amp;id=14M5Hu8sYlnQg521PP48IqSOOs56mRY0z'><br><br>
+
+5. After successfull processing, it will pop up a message for further instructions to use visualizations and<b> type Speaker number </b>according to it and Click <b>Show button</b>.<br><br>
+
+<img src='https://drive.google.com/uc?export=view&amp;id=1tsCXsP95ViHWCmdfdS4i78MAjTyuQrje'><br><br>
+
+<h2 id='deployment'>DEPLOYMENT</h2>
 
 
