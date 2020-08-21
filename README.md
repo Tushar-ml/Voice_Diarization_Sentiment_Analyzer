@@ -7,7 +7,6 @@
  - <a href="#usage">Usage</a>
 		 - <a href="#recording">Recording</a>
 		  - <a href="#uploading">Uploading File</a>
-- <a href="#deployment">Deployment</a>
 - <a href="#furtherenhancement">Further Enhancement</a>
 
  <h2 id="architecture">ARCHITECTURE</h2>
@@ -81,6 +80,10 @@ Now we are going to discuss how we reach to our final approach of selection of M
 
 <img src='https://drive.google.com/uc?export=view&amp;id=1tsCXsP95ViHWCmdfdS4i78MAjTyuQrje'><br><br>
 
-<h2 id='deployment'>DEPLOYMENT</h2>
+<h2 id='furtherenhancement'> FURTHER ENHANCEMENT</h2>
 
+ - [ ] Fine Tuning of Models
+ - [ ] Connection of Database of Organisation
+ - [ ] More Generic Application
+ - [ ] More Features: Query Extractor, Voice verification
 
