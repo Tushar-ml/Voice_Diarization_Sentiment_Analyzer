@@ -51,7 +51,21 @@ Now we are going to discuss how we reach to our final approach of selection of M
 	<p>Then we move on to another advanced approach: <b>Embedding Based Approach</b>,
 	means that a meaning of word changes  with the  context in which it is used. It depends on the neighbourhood words , for which we use Embeddings, which means an N-Dimensional space vector where words are present whose similarities between each word derives from the Cosine Similarity or Euclidean Distance . Models which are based on this approach are <b>Flair</b> and <b> FastText </b>( by FaceBook ). </p>
 
-	<p>This type of systems are mostly organisation based , means in some orgaisation consider  some kind of words to be negative like in Banks such as Fraud. So here we need combination of Both <b> Dictionary and Embedding Based Approach .</b>
+	<p>This type of systems are mostly organisation based , means in some orgaisation consider  some kind of words to be negative like in Banks such as Fraud. So here we need combination of Both <b> Dictionary and Embedding Based Approach .</b></p>
 
 
 <h2 id='usage'>USAGE</h2>
+<u><h3 id='recording'>Recording</h3></u>
+	1. <b>Press the Record Button</b>.<br><br>
+	<img src='https://drive.google.com/uc?export=view&amp;id=1svFCA0jqA5wT9eN-UOf6pq8cdP-pGaET'><br><br>
+	2. It will take you to another webpage , where it will be asking for <b>microphone access</b> of your browser and it will <b>start recording</b> and you can see <b>live visualization graph .</b><br><br>
+	<img src='https://drive.google.com/uc?export=view&amp;id=1lz6omVtWbDjNh9Kj0-nM91FlKGf_T5Ic'><br>
+	<br>
+	3.After you have done recording, it will take some time to buffer all your audio and give  a static graph, which is automatically saved to your history.<br><br>
+	<img src='https://drive.google.com/uc?export=view&amp;id=1HWEtTvphK46gUFx3Vwi5ysVfEHGspT7v'>
+
+<u><h3 id='uploading'> Uploading a File </h3></u>
+
+
+
+
